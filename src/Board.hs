@@ -2,6 +2,8 @@ module Board where
 import Data.List (delete)
 import Control.Applicative (Alternative(empty))
 import Random
+import qualified Debug.Trace as Db
+import qualified Debug.Trace as Db
 
 type Coord = (Int, Int)
 
@@ -98,7 +100,7 @@ addObject a b =
     Robot {}-> b {robots = robots b ++ [a]}
     Dirt _ _ -> b {dirts = dirts b ++ [a]}
     Obstacle _ -> b {obstacles = obstacles b ++[a]}
-    Playpen _ _ -> b {obstacles = playpens b ++ [a] }
+    Playpen _ _ -> b {playpens = playpens b ++ [a] }
 
 deleteObject :: Object -> Environment -> Environment
 deleteObject a b =
@@ -167,7 +169,7 @@ isRobot obj =
 
 findAllRobots :: Environment -> [Object]
 findAllRobots e =
-  children e ++ findAllRobotsIndirt (dirts e) ++ findAllRobotsInPlayPen (playpens e)
+  robots e ++ findAllRobotsIndirt (dirts e) ++ findAllRobotsInPlayPen (playpens e)
 
 
 findAllRobotsIndirt :: [Object] -> [Object]
@@ -223,7 +225,7 @@ inVisited c l =
   not (null l) && (
     let
       aux =case head l of
-        (c,_,_) -> True
+        (d,_,_) -> c==d
     in aux || inVisited c (tail l))
 
 
@@ -231,18 +233,26 @@ inVisited c l =
 bfs:: Object -> [(Coord,Coord,Int)]-> [(Coord, Coord,Int)] -> Environment -> [(Coord, Coord,Int)]
 bfs obj queue visited env =
   if null queue && not (null visited)
-    then visited
+    then 
+      visited
+      -- Db.trace ("Answer BFS: "++show visited++"\n") visited
     else
       let
-        q1 = if null queue then [(location obj,location obj,0)] else queue
+        q1 =if null queue then [(location obj,location obj,0)] else queue
+        -- q1 = Db.trace ("Queue BFS:"++ show (if null queue then [(location obj,location obj,0)] else queue)) (if null queue then [(location obj,location obj,0)] else queue)
+
         deq = head q1
 
         parentCoor = case deq of (p,_,_)-> p
         distance = 1 + case deq of (_,_,d) ->d
-        adj = [ a | a<- adjacentDir parentCoor, validPos a env]
 
-        adjValid = [(x, parentCoor, distance) | x<- adj ,
-          not (isBarrier obj (let a = objectsAt x env in if null a then Dirt Nothing (0,0) else head a )) && not (inVisited x visited)]
+        adj = [ a | a<- adjacentDir parentCoor, validPos a env]
+        -- adj = Db.trace ("Adjacent to "++ show parentCoor++" "++"\n Visited:"++show visited ++"\n "++ show[ a | a<- adjacentDir parentCoor, validPos a env]) [ a | a<- adjacentDir parentCoor, validPos a env]
+
+
+        adjValid= [(x, parentCoor, distance) | x<- adj ,not (isBarrier obj (let a = objectsAt x env in if null a then Dirt Nothing (0,0) else head a )) && not (inVisited x (visited++q1))]
+        -- adjValid = Db.trace ("AdjacentValid to " ++show parentCoor ++" "++ show ([(x, parentCoor, distance) | x<- adj ,
+        --   not (isBarrier obj (let a = objectsAt x env in if null a then Dirt Nothing (0,0) else head a )) && not (inVisited x (visited++q1))])++"\n") [(x, parentCoor, distance) | x<- adj ,not (isBarrier obj (let a = objectsAt x env in if null a then Dirt Nothing (0,0) else head a )) && not (inVisited x (visited++q1))]
 
         answer = bfs obj ((if length q1 == 1 then [] else tail q1) ++ adjValid) (visited ++ [deq]) env
         in answer

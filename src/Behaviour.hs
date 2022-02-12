@@ -6,6 +6,7 @@ import Random
 import Data.Bifunctor
 import Data.List (delete)
 import Configuration
+import qualified Debug.Trace as Db
 
 --falta poner el environment
 
@@ -132,7 +133,7 @@ robotActionClosestChild r e =
       _-> (-1,-1)
     obj =head ( objectsAt c e )
     bfsData = bfs r [] [] e
-    bfsReversed = reverse bfsData
+    bfsReversed = Db.trace ("BFS:"++show bfsData++"\nReversed BFS:"++show (reverse bfsData)) (reverse bfsData)
 
     e1= case obj of
       -------------------Robot---------------------------------------------------
@@ -150,31 +151,31 @@ robotActionClosestChild r e =
                 | length path <=1 = robotActionClosestDirt r e ----Peste----
                 | length path >2 =
                   let
-                    (c2,_,_) = bfsData !! 2
+                    (c2,_,_) = path !! 2
 
                     e3 = deleteObject obj e
                     e4 = secureAddObject (Robot AlphaRobot (Just (Child c2)) c2) c2 e3
                     in e4
                 | otherwise =
                   let
-                    (c2,_,_) = bfsData !! 1
+                    (c2,_,_) = path !! 1
                     e3 = deleteObject obj e
                     e4 = secureAddObject (Robot AlphaRobot (Just (Child c2)) c2) c2 e3
                     in e4
               in e2
           _->
             let
-              child = closestChildFree bfsData e
+              child = Db.trace (show(closestChildFree bfsData e)) (closestChildFree bfsData e)
               c1 = case child of
                 Just(Child c) -> c
                 _ -> (-1,-1)
-              path = if c1 == (-1,-1) then [] else path1 bfsReversed c1
+              path = Db.trace ("Path: "++show(if c1 == (-1,-1) then [] else path1 bfsReversed c1)) (if c1 == (-1,-1) then [] else path1 bfsReversed c1)
 
               e2
                 | length path <=1 = robotActionClosestDirt r e  ---Peste----
                 | otherwise =
                   let
-                    (c2,_,_) = bfsData !! 1
+                    (c2,_,_) = Db.trace (show (path !! 1)) (path !! 1)
                     e3 = deleteObject obj e
                     e4 = secureAddObject (Robot AlphaRobot Nothing c2) c2 e3
                     in e4
@@ -194,7 +195,7 @@ robotActionClosestChild r e =
                 | length path <=1 = robotActionClosestDirt r e --esto aqui tiene peste----
                 | otherwise =
                   let
-                    (c2,_,_) = bfsData !! 1
+                    (c2,_,_) = path !! 1
                     e3 = deleteObject obj e
                     e4 = addObject (Playpen (Just(Child c1)) c1 ) e3
                     e5 = secureAddObject (Robot AlphaRobot Nothing  c2) c2 e4
@@ -212,7 +213,7 @@ robotActionClosestChild r e =
                 | length path <=1 = robotActionClosestDirt r e --esto aqui tiene peste----
                 | otherwise =
                   let
-                    (c2,_,_) = bfsData !! 1
+                    (c2,_,_) = path !! 1
                     e3 = deleteObject obj e
                     e4 = addObject (Playpen Nothing  c1 ) e3
                     e5 = secureAddObject (Robot AlphaRobot Nothing  c2) c2 e4
@@ -234,7 +235,7 @@ robotActionClosestChild r e =
                 | length path <=1 = robotActionClosestDirt r e ----Peste----
                 | length path >2 =
                   let
-                    (c2,_,_) = bfsData !! 2
+                    (c2,_,_) = path !! 2
 
                     e3 = deleteObject obj e
                     e4 = addObject (Dirt Nothing c) e3
@@ -242,7 +243,7 @@ robotActionClosestChild r e =
                     in e5
                 | otherwise =
                   let
-                    (c2,_,_) = bfsData !! 1
+                    (c2,_,_) = path !! 1
                     e3 = deleteObject obj e
                     e4 = addObject (Dirt Nothing c) e3
                     e5 = secureAddObject (Robot AlphaRobot (Just (Child c2)) c2) c2 e4
@@ -260,7 +261,7 @@ robotActionClosestChild r e =
                 | length path <=1 = robotActionClosestDirt r e  ---Peste----
                 | otherwise =
                   let
-                    (c2,_,_) = bfsData !! 1
+                    (c2,_,_) = path !! 1
                     e3 = deleteObject obj e
                     e4 = addObject (Dirt Nothing c) e3
                     e5 = secureAddObject (Robot AlphaRobot (Just (Child c2)) c2) c2 e5
@@ -297,14 +298,14 @@ robotActionClosestDirt r e =
                 | length path <=1 = e ----Peste----
                 | length path >2 =
                   let
-                    (c2,_,_) = bfsData !! 2
+                    (c2,_,_) = path !! 2
 
                     e3 = deleteObject obj e
                     e4 = secureAddObject (Robot AlphaRobot (Just (Child c2)) c2) c2 e3
                     in e4
                 | otherwise =
                   let
-                    (c2,_,_) = bfsData !! 1
+                    (c2,_,_) = path !! 1
                     e3 = deleteObject obj e
                     e4 = secureAddObject (Robot AlphaRobot (Just (Child c2)) c2) c2 e3
                     in e4
@@ -321,7 +322,7 @@ robotActionClosestDirt r e =
                 | length path <=1 = e  ---Peste----
                 | otherwise =
                   let
-                    (c2,_,_) = bfsData !! 1
+                    (c2,_,_) = path !! 1
                     e3 = deleteObject obj e
                     e4 = secureAddObject (Robot AlphaRobot Nothing c2) c2 e3
                     in e4
@@ -341,7 +342,7 @@ robotActionClosestDirt r e =
                 | length path <=1 = e --esto aqui tiene peste----
                 | otherwise =
                   let
-                    (c2,_,_) = bfsData !! 1
+                    (c2,_,_) = path !! 1
                     e3 = deleteObject obj e
                     e4 = addObject (Playpen (Just(Child c1)) c1 ) e3
                     e5 = secureAddObject (Robot AlphaRobot Nothing  c2) c2 e4
@@ -359,7 +360,7 @@ robotActionClosestDirt r e =
                 | length path <=1 = e --esto aqui tiene peste----
                 | otherwise =
                   let
-                    (c2,_,_) = bfsData !! 1
+                    (c2,_,_) = path !! 1
                     e3 = deleteObject obj e
                     e4 = addObject (Playpen Nothing  c1 ) e3
                     e5 = secureAddObject (Robot AlphaRobot Nothing  c2) c2 e4
@@ -381,7 +382,7 @@ robotActionClosestDirt r e =
                 | length path <=1 = e ----Peste----
                 | length path >2 =
                   let
-                    (c2,_,_) = bfsData !! 2
+                    (c2,_,_) = path !! 2
 
                     e3 = deleteObject obj e
                     e4 = addObject (Dirt Nothing c) e3
@@ -389,7 +390,7 @@ robotActionClosestDirt r e =
                     in e5
                 | otherwise =
                   let
-                    (c2,_,_) = bfsData !! 1
+                    (c2,_,_) = path !! 1
                     e3 = deleteObject obj e
                     e4 = addObject (Dirt Nothing c) e3
                     e5 = secureAddObject (Robot AlphaRobot (Just (Child c2)) c2) c2 e4
@@ -407,7 +408,7 @@ robotActionClosestDirt r e =
                 | length path <=1 = e  ---Peste----
                 | otherwise =
                   let
-                    (c2,_,_) = bfsData !! 1
+                    (c2,_,_) = path !! 1
                     e3 = deleteObject obj e
                     e4 = addObject (Dirt Nothing c) e3
                     e5 = secureAddObject (Robot AlphaRobot (Just (Child c2)) c2) c2 e5
@@ -450,14 +451,14 @@ robotActionImprove r e =
                 | length path <=1 = e ----Peste----
                 | length path >2 =
                   let
-                    (c2,_,_) = bfsData !! 2
+                    (c2,_,_) = path !! 2
 
                     e3 = deleteObject obj e
                     e4 = secureAddObject (Robot AlphaRobot (Just (Child c2)) c2) c2 e3
                     in e4
                 | otherwise =
                   let
-                    (c2,_,_) = bfsData !! 1
+                    (c2,_,_) = path !! 1
                     e3 = deleteObject obj e
                     e4 = secureAddObject (Robot AlphaRobot (Just (Child c2)) c2) c2 e3
                     in e4
@@ -482,7 +483,7 @@ robotActionImprove r e =
                 | length path <=1 = e  ---Peste----
                 | otherwise =
                   let
-                    (c2,_,_) = bfsData !! 1
+                    (c2,_,_) = path !! 1
                     e3 = deleteObject obj e
                     e4 = secureAddObject (Robot AlphaRobot Nothing c2) c2 e3
                     in e4
@@ -510,7 +511,7 @@ robotActionImprove r e =
                 | length path <=1 = e --esto aqui tiene peste----
                 | otherwise =
                   let
-                    (c2,_,_) = bfsData !! 1
+                    (c2,_,_) = path !! 1
                     e3 = deleteObject obj e
                     e4 = addObject (Playpen (Just(Child c1)) c1 ) e3
                     e5 = secureAddObject (Robot AlphaRobot Nothing  c2) c2 e4
@@ -536,7 +537,7 @@ robotActionImprove r e =
                 | length path <=1 = e --esto aqui tiene peste----
                 | otherwise =
                   let
-                    (c2,_,_) = bfsData !! 1
+                    (c2,_,_) = path !! 1
                     e3 = deleteObject obj e
                     e4 = addObject (Playpen Nothing  c1 ) e3
                     e5 = secureAddObject (Robot AlphaRobot Nothing  c2) c2 e4
@@ -566,7 +567,7 @@ robotActionImprove r e =
                 | length path <=1 = robotActionClosestDirt r e ----Peste----
                 | length path >2 =
                   let
-                    (c2,_,_) = bfsData !! 2
+                    (c2,_,_) = path !! 2
 
                     e3 = deleteObject obj e
                     e4 = addObject (Dirt Nothing c) e3
@@ -574,7 +575,7 @@ robotActionImprove r e =
                     in e5
                 | otherwise =
                   let
-                    (c2,_,_) = bfsData !! 1
+                    (c2,_,_) =  path !! 1
                     e3 = deleteObject obj e
                     e4 = addObject (Dirt Nothing c) e3
                     e5 = secureAddObject (Robot AlphaRobot (Just (Child c2)) c2) c2 e4

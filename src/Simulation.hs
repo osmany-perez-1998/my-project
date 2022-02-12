@@ -1,5 +1,5 @@
 module Simulation where
-
+import Debug.Trace(trace)
 import Behaviour
 import Configuration
 import Board (Environment (Environment, seed, children, time), Object (Playpen), generatePlaypen, generateChildren, generateRobot, generateObst, generateDirt, findAllRobots)
@@ -66,6 +66,6 @@ simulationAux simType envList =
         e2 = moveChildren e1
         e3 = moveRobot simType e2
         e4 = e3{time = time e3 + 1}
-        in simulationAux simType(envList ++ [e4])
+        in simulationAux simType (envList ++ [e4])
 
     
