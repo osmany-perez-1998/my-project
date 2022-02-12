@@ -28,7 +28,6 @@ library
       Behaviour
       Board
       Configuration
-      Print
       Random
       Simulation
   other-modules:
